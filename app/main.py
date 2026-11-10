@@ -1,8 +1,14 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from app.core.database import get_db
+from app.api.deps import get_db
 from app.api.routes import auth, users
+
+# services/task_service.py: functions like create_task, get_task, list_tasks, update_task, delete_task. Every query filters by owner_id.
+# routes/tasks.py: POST /tasks, GET /tasks, GET /tasks/{id}, PATCH /tasks/{id}, DELETE /tasks/{id}, all using Depends(get_current_user).
+# Register the router in main.py.
+# Pagination and filtering on GET /tasks.
+# Tests with pytest.
 
 app = FastAPI(title="Task Manager API")
 

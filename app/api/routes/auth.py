@@ -6,7 +6,7 @@ from app.schemas.token import Token
 from app.schemas.user import UserCreate, UserRead
 from app.services.auth_service import EmailAlreadyRegistered, authenticate_user, register_user
 from sqlalchemy.orm import Session
-from app.core.database import get_db
+from app.api.deps import get_db
 from app.core.security import create_access_token
 
 
