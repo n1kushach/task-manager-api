@@ -3,6 +3,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
+
 class Settings(BaseSettings):
     # Database
     database_url: str
@@ -24,4 +25,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-
