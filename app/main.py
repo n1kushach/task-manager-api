@@ -1,49 +1,14 @@
-from typing import Annotated
-
 from fastapi import FastAPI, Depends, HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from app.core.security import oauth2_scheme
 from app.core.database import get_db
-from app.schemas.user import User, fake_users_db, UserInDB, fake_hash_password
-from app.schemas.user import get_current_active_user
+from app.api.routes import auth, users
 
-app = FastAPI()
-
-
-@app.get("/items")
-async def read_items(token: Annotated[str, Depends(oauth2_scheme)]):
-    return {"token": token}
+app = FastAPI(title="Task Manager API")
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World!"}
-
-
-@app.post("/token")
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    user_dict = fake_users_db.get(form_data.username)
-    if not user_dict:
-        raise HTTPException(
-            status_code=400, detail="Incorrect username or password")
-    user = UserInDB(**user_dict)
-    hashed_password = fake_hash_password(form_data.password)
-    if not hashed_password:
-        raise HTTPException(
-            status_code=400, detail="Incorrect username or password")
-    return {"access_token": user.username, "token_type": "bearer"}
-
-
-@app.get("/users/me")
-async def read_users_me(current_user: Annotated[User, Depends(get_current_active_user)]) -> User:
-    return current_user
-
-
-@app.get("/users/me/items")
-async def read_own_items(current_user: User = Depends(get_current_active_user)):
-    return [{"item_id": "Foo", "owner": current_user.username}]
+app.include_router(auth.router)
+app.include_router(users.router)
 
 
 @app.get("/health/db")
