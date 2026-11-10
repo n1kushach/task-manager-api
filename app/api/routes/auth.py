@@ -1,9 +1,7 @@
-from datetime import timedelta
 from typing import Annotated
-from fastapi import Form, status
+from fastapi import status
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from app.core.config import settings
 from app.schemas.token import Token
 from app.schemas.user import UserCreate, UserRead
 from app.services.auth_service import EmailAlreadyRegistered, authenticate_user, register_user
@@ -17,9 +15,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED, responses={
     409: {"description": "Email already registered"},
-    422: {"description": "Validation error"}
 })
-async def register(
+def register(
     payload: UserCreate,
     db: Annotated[Session, Depends(get_db)]
 ):
@@ -31,7 +28,7 @@ async def register(
 
 
 @router.post("/login", response_model=Token, responses={401: {"description": "Incorrect email or password"}})
-async def login(
+def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Annotated[Session, Depends(get_db)]
 ):
