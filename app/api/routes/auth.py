@@ -14,6 +14,9 @@ from app.services.auth_service import (
     register_user,
 )
 
+DbSession = Annotated[Session, Depends(get_db)]
+FormData = Annotated[OAuth2PasswordRequestForm, Depends()]
+
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
@@ -25,7 +28,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
         409: {"description": "Email already registered"},
     },
 )
-def register(payload: UserCreate, db: Annotated[Session, Depends(get_db)]):
+def register(payload: UserCreate, db: DbSession):
     try:
         return register_user(db, payload.email, payload.password)
     except EmailAlreadyRegistered:
@@ -38,8 +41,8 @@ def register(payload: UserCreate, db: Annotated[Session, Depends(get_db)]):
     responses={401: {"description": "Incorrect email or password"}},
 )
 def login(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    db: Annotated[Session, Depends(get_db)],
+    form_data: FormData,
+    db: DbSession,
 ):
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
