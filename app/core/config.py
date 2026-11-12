@@ -16,7 +16,7 @@ class Settings(BaseSettings):
 
     # App
     app_name: str = "Task Manager API"
-    debug: bool = False
+    debug: bool = True
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
