@@ -12,12 +12,14 @@ from app.schemas.tasks import (
     TaskPriority,
     TaskRead,
     TaskStatus,
+    TaskUpdate,
 )
 from app.services.task_service import (
     create_task,
     delete_task,
     get_task_with_id,
     get_tasks,
+    update_task,
 )
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
@@ -64,3 +66,11 @@ def delete(task_id: int, db: DbSession, current_user: CurrentUser):
     if not deleted:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Task not found")
     return {"message": f"Task with id - {task_id} deleted successfully"}
+
+
+@router.patch("/update/{task_id}")
+def update(task_in: TaskUpdate, task_id: int, db: DbSession, current_user: CurrentUser):
+    task = update_task(db, task_id, current_user.id, task_in)
+    if not task:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Task not found")
+    return task
