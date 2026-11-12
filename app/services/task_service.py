@@ -56,17 +56,12 @@ def update_task(
     ).first()
     if task is None:
         return None
-
-    updates = task_in.model_dump(exclude_unset=True)
-
-    # guard: these columns can't be NULL, so ignore explicit nulls
-    for field in ("title", "status", "priority"):
-        if updates.get(field, ...) is None:
-            updates.pop(field)
-
-    for field, value in updates.items():
+    for field, value in task_in.model_dump(exclude_unset=True).items():
         setattr(task, field, value)
-
+    for field in ("title", "status", "priority"):
+        if getattr(task, field) is None:
+            db.rollback()
+            raise ValueError(f"{field} cannot be null!")
     db.commit()
     db.refresh(task)
     return task

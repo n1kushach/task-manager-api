@@ -68,9 +68,12 @@ def delete(task_id: int, db: DbSession, current_user: CurrentUser):
     return {"message": f"Task with id - {task_id} deleted successfully"}
 
 
-@router.patch("/update/{task_id}")
+@router.post("/update/{task_id}")
 def update(task_in: TaskUpdate, task_id: int, db: DbSession, current_user: CurrentUser):
-    task = update_task(db, task_id, current_user.id, task_in)
-    if not task:
+    try:
+        task = update_task(db, task_id, current_user.id, task_in)
+    except ValueError as e:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e))
+    if task is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Task not found")
     return task
