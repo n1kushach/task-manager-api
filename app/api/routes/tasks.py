@@ -14,6 +14,7 @@ from app.schemas.tasks import (
     TaskRead,
     TaskStatus,
 )
+from app.services.task_service import create_task
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -21,16 +22,13 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 @router.post(
     "/", response_model=TaskCreateResponse, status_code=status.HTTP_201_CREATED
 )
-def create_task(
+def add(
     task_in: TaskCreate,
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    task = Task(**task_in.model_dump(), owner_id=current_user.id)
-    db.add(task)
-    db.commit()
-    db.refresh(task)
-    return {"message": "Task created successfully", "task": task}
+    new_task = create_task(task_in, db, current_user.id)
+    return {"message": "Task created successfully", "task": new_task}
 
 
 @router.get("/", response_model=list[TaskRead])
