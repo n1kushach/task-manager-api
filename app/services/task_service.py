@@ -49,19 +49,34 @@ def delete_task(task_id: int, db: Session, owner_id: int) -> bool:
 
 
 def update_task(
-    db: Session, task_id: int, owner_id: int, task_in: TaskUpdate
+    db: Session,
+    task_id: int,
+    owner_id: int,
+    task_in: TaskUpdate,
 ) -> Task | None:
     task = db.scalars(
-        select(Task).where(Task.id == task_id, Task.owner_id == owner_id)
+        select(Task).where(
+            Task.id == task_id,
+            Task.owner_id == owner_id,
+        )
     ).first()
+
     if task is None:
         return None
-    for field, value in task_in.model_dump(exclude_unset=True).items():
-        setattr(task, field, value)
-    for field in ("title", "status", "priority"):
-        if getattr(task, field) is None:
-            db.rollback()
+
+    update_data = task_in.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        if field in ("title", "status", "priority") and value is None:
             raise ValueError(f"{field} cannot be null!")
-    db.commit()
-    db.refresh(task)
+
+        setattr(task, field, value)
+
+    try:
+        db.commit()
+        db.refresh(task)
+    except Exception:
+        db.rollback()
+        raise
+
     return task

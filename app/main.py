@@ -6,7 +6,7 @@ from app.api.deps import get_db
 from app.api.routes import auth, tasks, users
 
 # Error handling for all current routes, preferably write one global error handler for the whole project.
-# Pagination and filtering on GET /tasks.
+# Pagination.
 # Read pytest doc and start writing tests.
 
 app = FastAPI(title="Task Manager API")
