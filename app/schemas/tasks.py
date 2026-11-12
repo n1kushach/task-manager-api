@@ -56,3 +56,7 @@ class TaskRead(TaskBase):
 class TaskCreateResponse(BaseModel):
     message: str
     task: TaskRead
+
+
+class TaskDeleteResponse(BaseModel):
+    message: str

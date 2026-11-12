@@ -7,7 +7,7 @@ from app.api.routes import auth, tasks, users
 
 # services/task_service.py: functions like create_task, get_task, list_tasks, update_task, delete_task. Every query filters by owner_id.
 # routes/tasks.py: POST /tasks, GET /tasks, GET /tasks/{id}, PATCH /tasks/{id}, DELETE /tasks/{id}, all using Depends(get_current_user).
-# Register the router in main.py.
+# Error handling for all current routes, preferably write one global error handler for the whole project.
 # Pagination and filtering on GET /tasks.
 # Tests with pytest.
 

@@ -20,7 +20,7 @@ def get_tasks(
     priority: TaskPriority | None = None,
     skip: int = 0,
     limit: int = 20,
-):
+) -> list[Task]:
     query = select(Task).where(Task.owner_id == owner_id)
 
     if status is not None:
@@ -30,3 +30,19 @@ def get_tasks(
 
     query = query.order_by(Task.created_at.desc()).offset(skip).limit(limit)
     return list(db.scalars(query).all())
+
+
+def get_task_with_id(task_id: int, db: Session, owner_id: int) -> Task | None:
+    query = select(Task).where(Task.owner_id == owner_id, Task.id == task_id)
+    return db.scalars(query).first()
+
+
+def delete_task(task_id: int, db: Session, owner_id: int) -> bool:
+    task = db.scalars(
+        select(Task).where(Task.id == task_id, Task.owner_id == owner_id)
+    ).first()
+    if task is None:
+        return False
+    db.delete(task)
+    db.commit()
+    return True
