@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_db
 from app.api.routes import auth, tasks, users
 
-# Refactor update to use POST, change everything and then check for items for not to be null.
 # Error handling for all current routes, preferably write one global error handler for the whole project.
 # Pagination and filtering on GET /tasks.
 # Read pytest doc and start writing tests.

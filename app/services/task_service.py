@@ -24,9 +24,9 @@ def get_tasks(
     query = select(Task).where(Task.owner_id == owner_id)
 
     if status is not None:
-        query.where(Task.status == status.value)
+        query = query.where(Task.status == status.value)
     if priority is not None:
-        query.where(Task.priority == priority)
+        query = query.where(Task.priority == priority)
 
     query = query.order_by(Task.created_at.desc()).offset(skip).limit(limit)
     return list(db.scalars(query).all())
