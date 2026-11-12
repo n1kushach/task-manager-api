@@ -1,33 +1,10 @@
+from pwdlib import PasswordHash
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from typing import Annotated
-from app.core.security import hash_password
-from alembic.util import status
-from app.core.security import oauth2_scheme
-from fastapi import Depends, HTTPException
-from app.core.config import settings
-import jwt
-from pwdlib import PasswordHash
-from app.models.user import User
-from app.schemas.token import TokenData
-from app.schemas.user import UserBase, UserInDB, UserRead
 
-fake_users_db = {
-    "johndoe": {
-        "username": "johndoe",
-        "full_name": "John Doe",
-        "email": "johndoe@example.com",
-        "hashed_password": hash_password("secret"),
-        "disabled": False,
-    },
-    "alice": {
-        "username": "alice",
-        "full_name": "Alice Wonderson",
-        "email": "alice@example.com",
-        "hashed_password": hash_password("secret2"),
-        "disabled": True,
-    },
-}
+from app.core.security import hash_password
+from app.models.user import User
+from app.schemas.user import UserInDB
 
 
 class EmailAlreadyRegistered(Exception):

@@ -1,7 +1,9 @@
-from datetime import datetime, date
+from datetime import date, datetime
 from typing import TYPE_CHECKING
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from sqlalchemy import ForeignKey, String, Text, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.core.database import Base
 
 if TYPE_CHECKING:
@@ -22,4 +24,4 @@ class Task(Base):
     updated_at: Mapped[datetime] = mapped_column(
         server_default=func.now(), onupdate=func.now()
     )
-    owner: Mapped["User"] = relationship(back_populates="tasks")
+    owner: Mapped[User] = relationship(back_populates="tasks")
