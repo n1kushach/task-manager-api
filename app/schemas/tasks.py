@@ -44,7 +44,7 @@ class TaskUpdate(BaseModel):
     _check_due_date = field_validator("due_date")(check_not_past)
 
 
-class TaskRead(TaskBase):
+class TaskResponse(TaskBase):
     model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 
     id: int
@@ -53,9 +53,17 @@ class TaskRead(TaskBase):
     updated_at: datetime
 
 
+class PaginatedTaskResponse(BaseModel):
+    tasks: list[TaskResponse]
+    total: int
+    skip: int
+    limit: int
+    has_more: bool
+
+
 class TaskCreateResponse(BaseModel):
     message: str
-    task: TaskRead
+    task: TaskResponse
 
 
 class TaskDeleteResponse(BaseModel):

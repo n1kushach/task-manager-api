@@ -6,11 +6,12 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user, get_db
 from app.models.user import User
 from app.schemas.tasks import (
+    PaginatedTaskResponse,
     TaskCreate,
     TaskCreateResponse,
     TaskDeleteResponse,
     TaskPriority,
-    TaskRead,
+    TaskResponse,
     TaskStatus,
     TaskUpdate,
 )
@@ -40,7 +41,7 @@ def add(
     return {"message": "Task created successfully", "task": new_task}
 
 
-@router.get("/", response_model=list[TaskRead])
+@router.get("/", response_model=PaginatedTaskResponse)
 def get(
     db: DbSession,
     current_user: CurrentUser,
@@ -52,7 +53,7 @@ def get(
     return get_tasks(db, current_user.id, status_, priority, skip, limit)
 
 
-@router.get("/{task_id}", response_model=TaskRead)
+@router.get("/{task_id}", response_model=TaskResponse)
 def get_with_id(db: DbSession, current_user: CurrentUser, task_id: int):
     return get_task_with_id(task_id, db, current_user.id)
 
