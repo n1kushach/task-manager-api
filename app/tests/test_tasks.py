@@ -1,19 +1,103 @@
-"""
-Create (POST /tasks)
+import pytest
+from fastapi.testclient import TestClient
 
-Minimal payload (title only) returns 201 (or whatever you use) and the defaults are applied: status == "todo", priority == "medium", description and due_date are None.
-Full payload (all fields) is echoed back correctly.
-owner_id equals the authenticated user’s id.
-id, created_at, and updated_at are present in the response.
-A client-supplied owner_id, id, or created_at in the body is ignored, so you can’t create a task for someone else.
-Missing title returns 422.
-Empty title ("") returns 422 (decide: only if you enforce min length).
-Title over 200 characters: decide between 422 and truncation. SQLite won’t enforce String(200), so you need Pydantic max_length for this to be caught.
-Wrong types (title as a number, due_date as "not-a-date") return 422.
-Invalid status or priority value returns 422 (only if you validate against an enum).
-A past due_date: decide whether it’s allowed.
-No auth returns 401.
-"""
+TEST_TASK = {
+    "title": "string",
+    "description": "string",
+    "status": "todo",
+    "priority": "medium",
+    "due_date": "2026-11-17",
+}
+
+
+# Helpers
+def create_task(client: TestClient, auth_headers: dict[str, str], payload):
+    return client.post("/tasks", headers=auth_headers, json=payload)
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        pytest.param({}, id="missing-title"),
+        pytest.param({"title": ""}, id="empty-title"),
+        pytest.param({"title": 123}, id="title-not-string"),
+        pytest.param({"title": "a" * 201}, id="title-too-long"),
+        pytest.param({"title": "x", "due_date": "not-a-date"}, id="due-date-garbage"),
+        pytest.param(
+            {"title": "x", "due_date": "2026-13-45"}, id="due-date-impossible"
+        ),
+        pytest.param({"title": "x", "status": "bogus"}, id="status-invalid"),
+    ],
+)
+# Checking validation errors
+def test_create_task_invalid_payload(
+    client: TestClient, auth_headers: dict[str, str], payload
+):
+    res = create_task(client, auth_headers, payload)
+    assert res.status_code == 422, res.json()
+
+
+@pytest.mark.parametrize("payload", [{"title": "Test title"}, TEST_TASK])
+# Checking task creation with correct fields
+def test_create_task(client: TestClient, auth_headers: dict[str, str], payload):
+    res = create_task(client, auth_headers, payload)
+    body = res.json()
+    id = body["task"]["id"]
+    created_at = body["task"]["created_at"]
+    updated_at = body["task"]["updated_at"]
+    assert res.status_code in (201, 200), (id, created_at, updated_at) in body
+
+
+@pytest.mark.parametrize("payload", [{"title": "Minimal payload"}])
+def test_create_task_minimal_payload(
+    client: TestClient, auth_headers: dict[str, str], payload
+):
+    res = create_task(client, auth_headers, payload)
+    body = res.json()
+    assert body["task"]["status"] == "todo", (
+        body["task"]["priority"] == "medium" in body
+    )
+
+
+@pytest.mark.parametrize("payload", [TEST_TASK])
+def test_create_task_full_payload(
+    client: TestClient, auth_headers: dict[str, str], payload
+):
+    res = create_task(client, auth_headers, payload)
+    body = res.json()
+    task = body["task"]
+    required = {
+        "title",
+        "description",
+        "status",
+        "priority",
+        "due_date",
+        "id",
+        "owner_id",
+        "created_at",
+        "updated_at",
+    }
+    assert required <= task.keys(), f"Missing: {required - task.keys()}"
+
+
+@pytest.mark.parametrize("payload", [{**TEST_TASK, "owner_id": 9999}])
+def test_cant_create_task_for_other(
+    client: TestClient,
+    auth_headers: dict[str, str],
+    payload,
+):
+    # Who am I? (adjust the URL to your route)
+    me = client.get("/users/me", headers=auth_headers)
+    assert me.status_code == 200, me.json()
+    user_id = me.json()["id"]
+
+    # Guard: the fake owner must differ from the real one
+    assert payload["owner_id"] != user_id
+
+    # Try to create a task owned by someone else
+    res = create_task(client, auth_headers, payload)
+    assert res.status_code == 422, res.json()
+
 
 """
 Read one (GET /tasks/{id})

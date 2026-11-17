@@ -29,6 +29,7 @@ class TaskBase(BaseModel):
 class TaskCreate(TaskBase):
     """Payload for creating a task. owner_id comes from the authenticated user, not the client."""
 
+    model_config = ConfigDict(extra="forbid")
     _check_due_date = field_validator("due_date")(check_not_past)
 
 
