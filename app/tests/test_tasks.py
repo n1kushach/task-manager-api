@@ -2,17 +2,25 @@ import pytest
 from fastapi.testclient import TestClient
 
 TEST_TASK = {
-    "title": "string",
-    "description": "string",
+    "title": "Test task title",
+    "description": "Test task description",
     "status": "todo",
     "priority": "medium",
-    "due_date": "2026-11-17",
+    "due_date": "2026-11-18",
 }
 
 
 # Helpers
 def create_task(client: TestClient, auth_headers: dict[str, str], payload):
     return client.post("/tasks", headers=auth_headers, json=payload)
+
+
+def get_task_by_id(client: TestClient, auth_headers: dict[str, str], payload):
+    return client.get(f"/tasks/{payload}", headers=auth_headers)
+
+
+def get_tasks(client: TestClient, auth_headers: dict[str, str]):
+    return client.get("/tasks", headers=auth_headers)
 
 
 @pytest.mark.parametrize(
@@ -108,6 +116,25 @@ Another user’s task returns 404 (already covered in test_auth.py; keep one her
 Non-integer id (/tasks/abc) returns 422.
 No auth returns 401.
 """
+
+
+def test_get_single_task_with_all_fields(
+    client: TestClient, auth_headers: dict[str, str], created_task
+):
+    res = get_task_by_id(client, auth_headers, created_task["task"]["id"])
+    task = res.json()
+    required = {
+        "title",
+        "description",
+        "status",
+        "priority",
+        "due_date",
+        "id",
+        "owner_id",
+        "created_at",
+        "updated_at",
+    }
+    assert required <= task.keys(), f"Missing: {required - task.keys()}"
 
 
 """

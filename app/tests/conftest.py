@@ -10,6 +10,8 @@ from app.api.deps import get_db
 from app.core.config import settings
 from app.core.database import Base
 from app.main import app
+from app.schemas.tasks import TaskCreate
+from app.tests.test_tasks import TEST_TASK, create_task
 
 engine = create_engine(
     "sqlite://",
@@ -66,3 +68,10 @@ def auth_headers(client: TestClient, registered_user: dict[str, str]) -> dict[st
     return {
         "Authorization": f"{body['token_type'].capitalize()} {body['access_token']}"
     }
+
+
+@pytest.fixture
+def created_task(client: TestClient, auth_headers: dict[str, str]) -> TaskCreate:
+    res = create_task(client, auth_headers, TEST_TASK)
+    assert res.status_code in (200, 201), res.json()
+    return res.json()
