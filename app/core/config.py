@@ -13,7 +13,9 @@ class Settings(BaseSettings):
     secret_key: str
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
-
+    # Credentials for testing
+    test_username: str
+    test_password: str
     # App
     app_name: str = "Task Manager API"
     debug: bool = True

@@ -7,6 +7,11 @@ from app.api.routes import auth, tasks, users
 app = FastAPI(title="Task Manager API")
 
 
+@app.get("/")
+def main():
+    return {"message": "This is homepage"}
+
+
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(tasks.router)

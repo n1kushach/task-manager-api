@@ -48,37 +48,3 @@ def authenticate_user(db: Session, email: str, password: str) -> User | None:
     if not user or not verify_password(password, user.hashed_password):
         return None
     return user
-
-
-# async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
-#     credentials_exception = HTTPException(
-#         status_code=status.HTTP_401_UNAUTHORIZED,
-#         detail="Could not validate credentials",
-#         headers={"WWW-Authenticate": "Bearer"},
-#     )
-#     try:
-#         payload = jwt.decode(token, settings.secret_key,
-#                              algorithms=[settings.algorithm])
-#         username = payload.get("sub")
-#         if username is None:
-#             raise credentials_exception
-#         token_data = TokenData(username=username)
-#     except jwt.InvalidTokenError:
-#         raise credentials_exception
-#     # Added
-#     if token_data.username is None:
-#         raise credentials_exception
-#     # Added
-#     user = get_user(fake_users_db, username=token_data.username)
-#     if user is None:
-#         raise credentials_exception
-#     return user
-
-
-# async def get_current_active_user(current_user: Annotated[UserRead, Depends(get_current_user)]):
-#     if current_user.is_active is False:
-#         raise HTTPException(
-#             status_code=400,
-#             detail="Inactive user"
-#         )
-#     return current_user

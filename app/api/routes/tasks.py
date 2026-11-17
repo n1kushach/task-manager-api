@@ -55,11 +55,14 @@ def get(
 
 @router.get("/{task_id}", response_model=TaskResponse)
 def get_with_id(db: DbSession, current_user: CurrentUser, task_id: int):
-    return get_task_with_id(task_id, db, current_user.id)
+    task = get_task_with_id(task_id, db, current_user.id)
+    if task is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Not found")
+    return task
 
 
 @router.delete(
-    "/delete/{task_id}",
+    "/{task_id}",
     response_model=TaskDeleteResponse,
 )
 def delete(task_id: int, db: DbSession, current_user: CurrentUser):
@@ -69,7 +72,7 @@ def delete(task_id: int, db: DbSession, current_user: CurrentUser):
     return {"message": f"Task with id - {task_id} deleted successfully"}
 
 
-@router.post("/update/{task_id}")
+@router.post("/{task_id}")
 def update(task_in: TaskUpdate, task_id: int, db: DbSession, current_user: CurrentUser):
     try:
         task = update_task(db, task_id, current_user.id, task_in)
