@@ -110,7 +110,6 @@ def test_cant_create_task_for_other(
 """
 Read one (GET /tasks/{id})
 
-Returns the task with all fields, matching what was created.
 Nonexistent id returns 404.
 Another user’s task returns 404 (already covered in test_auth.py; keep one here for CRUD completeness or skip the duplicate).
 Non-integer id (/tasks/abc) returns 422.
@@ -135,6 +134,11 @@ def test_get_single_task_with_all_fields(
         "updated_at",
     }
     assert required <= task.keys(), f"Missing: {required - task.keys()}"
+
+
+def test_get_single_task_without_id(client: TestClient, auth_headers: dict[str, str]):
+    res = get_task_by_id(client, auth_headers, payload=None)
+    assert res.status_code == 422
 
 
 """
