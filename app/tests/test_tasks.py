@@ -94,23 +94,14 @@ def test_cant_create_task_for_other(
     auth_headers: dict[str, str],
     payload,
 ):
-    # Who am I? (adjust the URL to your route)
     me = client.get("/users/me", headers=auth_headers)
     assert me.status_code == 200, me.json()
     user_id = me.json()["id"]
 
-    # Guard: the fake owner must differ from the real one
     assert payload["owner_id"] != user_id
 
-    # Try to create a task owned by someone else
     res = create_task(client, auth_headers, payload)
     assert res.status_code == 422, res.json()
-
-
-"""
-Read one (GET /tasks/{id})
-Non-integer id (/tasks/abc) returns 422.
-"""
 
 
 def test_get_single_task_with_all_fields(
@@ -171,7 +162,6 @@ def test_get_single_task_with_non_integer_id(client: TestClient, auth_headers):
 """
 List (GET /tasks)
 
-Empty list for a new user ([]).
 Returns multiple tasks, all owned by the caller.
 Doesn’t include other users’ tasks.
 Ordering is as documented (by id, by created date, etc.). Pin down whatever your API promises.
@@ -180,6 +170,13 @@ If you support sorting or due_date filtering: ascending and descending order, ta
 If you support pagination: first page, last page, a page beyond the end (empty), limit=0 or a negative value (422), and a limit above your maximum.
 No auth returns 401.
 """
+
+
+def test_get_tasks_new_user(client: TestClient, auth_headers):
+    res = get_tasks(client, auth_headers)
+    body = res.json()
+    assert len(body["tasks"]) == 0
+    assert body["total"] == 0
 
 
 """
