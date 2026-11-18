@@ -110,9 +110,7 @@ def test_cant_create_task_for_other(
 """
 Read one (GET /tasks/{id})
 
-Another user’s task returns 404 (already covered in test_auth.py; keep one here for CRUD completeness or skip the duplicate).
 Non-integer id (/tasks/abc) returns 422.
-No auth returns 401.
 """
 
 
@@ -158,6 +156,12 @@ def test_get_single_task_of_another_user(
     assert get_task_by_id(client, other_user_headers, task_id).status_code == 200
     res = get_task_by_id(client, auth_headers, task_id)
     assert res.status_code == 404, res.text
+
+
+def test_get_single_task_with_no_auth(client: TestClient, created_task):
+    created_task_id = created_task["task"]["id"]
+    res = get_task_by_id(client, {}, created_task_id)
+    assert res.status_code == 401, res.json()
 
 
 """
