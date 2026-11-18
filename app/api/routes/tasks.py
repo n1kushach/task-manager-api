@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -46,11 +47,12 @@ def get(
     db: DbSession,
     current_user: CurrentUser,
     status_: Annotated[TaskStatus | None, Query(alias="status")] = None,
+    due_date: date | None = None,
     priority: TaskPriority | None = None,
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
 ):
-    return get_tasks(db, current_user.id, status_, priority, skip, limit)
+    return get_tasks(db, current_user.id, status_, due_date, priority, skip, limit)
 
 
 @router.get("/{task_id}", response_model=TaskResponse)

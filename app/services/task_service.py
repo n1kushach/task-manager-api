@@ -1,3 +1,5 @@
+from datetime import date
+
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -24,15 +26,20 @@ def get_tasks(
     db: Session,
     owner_id: int,
     status: TaskStatus | None = None,
+    due_date: date | None = None,
     priority: TaskPriority | None = None,
     skip: int = 0,
     limit: int = 20,
 ) -> PaginatedTaskResponse:
+    print(f"due_date received: {due_date!r}")
+
     filters = [Task.owner_id == owner_id]
     if status is not None:
         filters.append(Task.status == status.value)
     if priority is not None:
         filters.append(Task.priority == priority.value)
+    if due_date is not None:
+        filters.append(Task.due_date >= due_date)
 
     total = db.scalar(select(func.count()).select_from(Task).where(*filters)) or 0
 
