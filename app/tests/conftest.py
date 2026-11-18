@@ -25,11 +25,12 @@ TEST_USER = {"email": settings.test_username, "password": settings.test_password
 
 TASKS_DATA = [
     {"title": "a", "status": "todo", "priority": "low"},
-    {"title": "b", "status": "todo", "priority": "high"},
-    {"title": "c", "status": "in_progress", "priority": "medium"},
+    {"title": "b", "status": "todo", "priority": "low"},
+    {"title": "c", "status": "todo", "priority": "high"},
     {"title": "d", "status": "in_progress", "priority": "medium"},
-    {"title": "e", "status": "done", "priority": "high"},
+    {"title": "e", "status": "in_progress", "priority": "medium"},
     {"title": "f", "status": "done", "priority": "high"},
+    {"title": "g", "status": "done", "priority": "high"},
 ]
 
 

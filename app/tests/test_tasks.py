@@ -220,6 +220,14 @@ def test_get_tasks_filtering_status(client: TestClient, auth_headers, mixed_task
         assert all(t["status"] == status for t in body["tasks"])
 
 
+def test_get_tasks_filtering_priority(client: TestClient, auth_headers, mixed_tasks):
+    possible_priority = {"low", "medium", "high"}
+    for priority in possible_priority:
+        res = get_tasks(client, auth_headers, {"priority": priority})
+        body = res.json()
+        assert all(t["priority"] == priority for t in body["tasks"])
+
+
 """
 Update (POST /tasks/{id})
 
