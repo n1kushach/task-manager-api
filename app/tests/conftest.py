@@ -83,3 +83,13 @@ def created_task(client: TestClient, auth_headers: dict[str, str]) -> TaskCreate
     res = create_task(client, auth_headers, TEST_TASK)
     assert res.status_code in (200, 201), res.json()
     return res.json()
+
+
+@pytest.fixture
+def created_tasks(client: TestClient, auth_headers: dict[str, str]):
+    tasks = []
+    for i in range(3):
+        res = create_task(client, auth_headers, {"title": f"Title-{i}"})
+        assert res.status_code in (200, 201), res.json()
+        tasks.append(res.json()["task"])
+    return tasks

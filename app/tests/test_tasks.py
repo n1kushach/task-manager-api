@@ -162,8 +162,7 @@ def test_get_single_task_with_non_integer_id(client: TestClient, auth_headers):
 """
 List (GET /tasks)
 
-Returns multiple tasks, all owned by the caller.
-Doesn’t include other users’ tasks.
+
 Ordering is as documented (by id, by created date, etc.). Pin down whatever your API promises.
 If you support filters: ?status=done returns only matching tasks, an unknown status returns an empty list or 422 (decide), and a combined filter such as status plus priority returns the intersection.
 If you support sorting or due_date filtering: ascending and descending order, tasks with None due dates (where do they go?), and a date range boundary on both ends.
@@ -177,6 +176,28 @@ def test_get_tasks_new_user(client: TestClient, auth_headers):
     body = res.json()
     assert len(body["tasks"]) == 0
     assert body["total"] == 0
+
+
+def test_get_tasks_returns_only_own_tasks(
+    client: TestClient, auth_headers, other_user_headers, created_tasks
+):
+    # Another user's task must not show up in my list
+    other = create_task(client, other_user_headers, {"title": "Not mine"})
+    assert other.status_code in (200, 201), other.text
+
+    res = client.get("/tasks", headers=auth_headers)
+    assert res.status_code == 200, res.text
+    body = res.json()
+
+    assert body["total"] == len(created_tasks), body
+    assert len(body["tasks"]) == len(created_tasks), body
+
+    # All returned tasks belong to the caller
+    user_id = created_tasks[0]["owner_id"]
+    assert all(t["owner_id"] == user_id for t in body["tasks"]), body
+
+    # Exactly my tasks came back, and not the other user's
+    assert {t["id"] for t in body["tasks"]} == {t["id"] for t in created_tasks}
 
 
 """
