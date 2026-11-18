@@ -148,6 +148,18 @@ def test_get_single_task_with_nonexistent_id(
     assert res.status_code == 404, res.json()
 
 
+def test_get_single_task_of_another_user(
+    client: TestClient, auth_headers, other_user_headers
+):
+    other_user_created = create_task(
+        client, other_user_headers, {"title": "Other user title"}
+    )
+    task_id = other_user_created.json()["task"]["id"]
+    assert get_task_by_id(client, other_user_headers, task_id).status_code == 200
+    res = get_task_by_id(client, auth_headers, task_id)
+    assert res.status_code == 404, res.text
+
+
 """
 List (GET /tasks)
 

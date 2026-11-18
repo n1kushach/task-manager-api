@@ -34,6 +34,11 @@ def login(client: TestClient, username: str, password: str):
     return client.post("/auth/login", data={"username": username, "password": password})
 
 
+def register(client: TestClient, username: str, password: str):
+    print(username, password)
+    return client.post("/auth/register", json={"email": username, "password": password})
+
+
 def make_token(
     sub: str = "1", expires_in: int = 600, secret: str = settings.secret_key
 ) -> str:

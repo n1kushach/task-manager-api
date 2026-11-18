@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.core.database import Base
 from app.main import app
 from app.schemas.tasks import TaskCreate
+from app.tests.test_auth import OTHER_USER, bearer, login, register
 from app.tests.test_tasks import TEST_TASK, create_task
 
 engine = create_engine(
@@ -68,6 +69,13 @@ def auth_headers(client: TestClient, registered_user: dict[str, str]) -> dict[st
     return {
         "Authorization": f"{body['token_type'].capitalize()} {body['access_token']}"
     }
+
+
+@pytest.fixture()
+def other_user_headers(client: TestClient) -> dict[str, str]:
+    register(client, OTHER_USER["email"], OTHER_USER["password"])
+    res = login(client, OTHER_USER["email"], OTHER_USER["password"])
+    return bearer(res.json()["access_token"])
 
 
 @pytest.fixture
