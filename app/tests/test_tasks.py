@@ -167,7 +167,6 @@ List (GET /tasks)
 
 If you support sorting or due_date filtering: ascending and descending order, tasks with None due dates (where do they go?), and a date range boundary on both ends.
 If you support pagination: first page, last page, a page beyond the end (empty), limit=0 or a negative value (422), and a limit above your maximum.
-No auth returns 401.
 """
 
 
@@ -226,6 +225,11 @@ def test_get_tasks_filtering_priority(client: TestClient, auth_headers, mixed_ta
         res = get_tasks(client, auth_headers, {"priority": priority})
         body = res.json()
         assert all(t["priority"] == priority for t in body["tasks"])
+
+
+def test_get_tasks_with_no_auth(client: TestClient):
+    res = get_tasks(client, {})
+    assert res.status_code == 401, res.json()
 
 
 """
