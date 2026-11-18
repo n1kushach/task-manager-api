@@ -21,6 +21,17 @@ engine = create_engine(
 )
 TestingSessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
+TEST_USER = {"email": settings.test_username, "password": settings.test_password}
+
+TASKS_DATA = [
+    {"title": "a", "status": "todo", "priority": "low"},
+    {"title": "b", "status": "todo", "priority": "high"},
+    {"title": "c", "status": "in_progress", "priority": "medium"},
+    {"title": "d", "status": "in_progress", "priority": "medium"},
+    {"title": "e", "status": "done", "priority": "high"},
+    {"title": "f", "status": "done", "priority": "high"},
+]
+
 
 @pytest.fixture()
 def db():
@@ -42,9 +53,6 @@ def client(db) -> Generator[TestClient]:
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
-
-
-TEST_USER = {"email": settings.test_username, "password": settings.test_password}
 
 
 @pytest.fixture()
@@ -93,3 +101,14 @@ def created_tasks(client: TestClient, auth_headers: dict[str, str]):
         assert res.status_code in (200, 201), res.json()
         tasks.append(res.json()["task"])
     return tasks
+
+
+@pytest.fixture
+def mixed_tasks(client: TestClient, auth_headers: dict[str, str]):
+    created_tasks = []
+    for data in TASKS_DATA:
+        res = create_task(client, auth_headers, data)
+        body = res.json()
+        assert res.status_code in (200, 201), res.json()
+        created_tasks.append(body["task"])
+    return created_tasks

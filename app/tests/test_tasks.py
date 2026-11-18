@@ -19,8 +19,10 @@ def get_task_by_id(client: TestClient, auth_headers: dict[str, str], payload):
     return client.get(f"/tasks/{payload}", headers=auth_headers)
 
 
-def get_tasks(client: TestClient, auth_headers: dict[str, str]):
-    return client.get("/tasks", headers=auth_headers)
+def get_tasks(
+    client: TestClient, auth_headers: dict[str, str], params: dict | None = None
+):
+    return client.get("/tasks", headers=auth_headers, params=params)
 
 
 @pytest.mark.parametrize(
@@ -162,7 +164,7 @@ def test_get_single_task_with_non_integer_id(client: TestClient, auth_headers):
 """
 List (GET /tasks)
 
-If you support filters: ?status=done returns only matching tasks, an unknown status returns an empty list or 422 (decide), and a combined filter such as status plus priority returns the intersection.
+
 If you support sorting or due_date filtering: ascending and descending order, tasks with None due dates (where do they go?), and a date range boundary on both ends.
 If you support pagination: first page, last page, a page beyond the end (empty), limit=0 or a negative value (422), and a limit above your maximum.
 No auth returns 401.
@@ -208,6 +210,14 @@ def test_get_tasks_ordering(client: TestClient, auth_headers):
     body = res.json()
     returned_ids = [t["id"] for t in body["tasks"]]
     assert returned_ids == list(reversed(created_ids)), returned_ids
+
+
+def test_get_tasks_filtering_status(client: TestClient, auth_headers, mixed_tasks):
+    possible_status = {"todo", "in_progress", "done"}
+    for status in possible_status:
+        res = get_tasks(client, auth_headers, {"status": status})
+        body = res.json()
+        assert all(t["status"] == status for t in body["tasks"])
 
 
 """
