@@ -39,7 +39,7 @@ def get_tasks(
     tasks = db.scalars(
         select(Task)
         .where(*filters)
-        .order_by(Task.created_at.desc())
+        .order_by(Task.created_at.desc(), Task.id.desc())
         .offset(skip)
         .limit(limit)
     ).all()

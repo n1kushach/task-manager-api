@@ -162,8 +162,6 @@ def test_get_single_task_with_non_integer_id(client: TestClient, auth_headers):
 """
 List (GET /tasks)
 
-
-Ordering is as documented (by id, by created date, etc.). Pin down whatever your API promises.
 If you support filters: ?status=done returns only matching tasks, an unknown status returns an empty list or 422 (decide), and a combined filter such as status plus priority returns the intersection.
 If you support sorting or due_date filtering: ascending and descending order, tasks with None due dates (where do they go?), and a date range boundary on both ends.
 If you support pagination: first page, last page, a page beyond the end (empty), limit=0 or a negative value (422), and a limit above your maximum.
@@ -198,6 +196,18 @@ def test_get_tasks_returns_only_own_tasks(
 
     # Exactly my tasks came back, and not the other user's
     assert {t["id"] for t in body["tasks"]} == {t["id"] for t in created_tasks}
+
+
+def test_get_tasks_ordering(client: TestClient, auth_headers):
+    created_ids = []
+    for i in range(3):
+        res = create_task(client, auth_headers, {"title": f"Task-{i}"})
+        body = res.json()
+        created_ids.append(body["task"]["id"])
+    res = get_tasks(client, auth_headers)
+    body = res.json()
+    returned_ids = [t["id"] for t in body["tasks"]]
+    assert returned_ids == list(reversed(created_ids)), returned_ids
 
 
 """
