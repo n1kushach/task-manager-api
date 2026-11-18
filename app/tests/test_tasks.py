@@ -109,7 +109,6 @@ def test_cant_create_task_for_other(
 
 """
 Read one (GET /tasks/{id})
-
 Non-integer id (/tasks/abc) returns 422.
 """
 
@@ -162,6 +161,11 @@ def test_get_single_task_with_no_auth(client: TestClient, created_task):
     created_task_id = created_task["task"]["id"]
     res = get_task_by_id(client, {}, created_task_id)
     assert res.status_code == 401, res.json()
+
+
+def test_get_single_task_with_non_integer_id(client: TestClient, auth_headers):
+    res = get_task_by_id(client, auth_headers, "abc")
+    assert res.status_code == 422, res.json()
 
 
 """
